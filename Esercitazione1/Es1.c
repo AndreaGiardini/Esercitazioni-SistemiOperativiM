@@ -27,11 +27,6 @@ void* thread_work(void* t){
     int* elements = (int*) t;
     int i,result=0;
 
-    /*
-    * Come distringuo un thread da un altro visto
-    * che i PID sono tutti identici?
-    */
-
     for(i=0; i < el_num; i++){
         if(elements[i] > result){
             result = elements[i];
@@ -42,6 +37,7 @@ void* thread_work(void* t){
 }
 
 void main (int argc, char* argv[]){
+
     int i, elements[NUM_EL], rc;
     void* status;
     pthread_t thread[NUM_TH];
@@ -82,7 +78,6 @@ void main (int argc, char* argv[]){
     }
     
     //Result
-
     printf("\nMaximum is: %d", max);
     
 }
