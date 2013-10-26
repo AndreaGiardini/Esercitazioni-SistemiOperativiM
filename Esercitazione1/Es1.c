@@ -21,12 +21,31 @@
 #define NUM_EL 10       //Numero di elementi
 #define NUM_TH 5        //Numero di Thread
 
+int el_num = NUM_EL / NUM_TH;
+
 void* thread_work(void* t){
-    printf("LOL");
+    int* elements = (int*) t;
+    int i,result=0;
+
+    /*
+    * Come distringuo un thread da un altro visto
+    * che i PID sono tutti identici?
+    */
+
+    for(i=0; i < el_num; i++){
+        if(elements[i] > result){
+            result = elements[i];
+        }    
+    }
+    
+    pthread_exit((void*) result); 
 }
 
-int main (int argc, char* argv[]){
-    int i, elements[NUM_EL];
+void main (int argc, char* argv[]){
+    int i, elements[NUM_EL], rc;
+    void* status;
+    pthread_t thread[NUM_TH];
+    long t;
     
     printf("Elements number: %d\nMax random number: %d\nThreads number: %d\n", NUM_EL, MAX_RND_NUM, NUM_TH);
     
@@ -38,6 +57,32 @@ int main (int argc, char* argv[]){
         printf("%d\t", elements[i]);
     }
     
-    printf("\n");
+    //Creazione Threads
+    for(i=0; i < NUM_TH ; i++){
+        rc = pthread_create(&thread[i], NULL, thread_work, (void *)elements + sizeof(int)*el_num*i); 
+        if (rc) { 
+            printf("ERRORE: %d\n", rc); 
+            exit(-1);
+        }   
+    }
+    
+    printf("\n\n");
+    //Join Threads and calculate maximum
+    int max=0;
+    for(i=0; i < NUM_TH ; i++){
+        rc = pthread_join(thread[i], &status); 
+        if (rc){
+            printf("ERRORE join thread &d codice %d\n", t, rc); 
+        }else{
+            printf("Finito thread con ris. %ld\n",(long)status);
+            if((long)status > max){
+                max = (int)status;
+            }
+        }
+    }
+    
+    //Result
+
+    printf("\nMaximum is: %d", max);
     
 }
