@@ -25,8 +25,6 @@ static sem_t semph[K];
 void * user(void * t){
     int i, k;
     
-    srand(time(NULL));
-    
     //Per ogni film
     for(i=0; i < K; i++){
         //Attendo che il semaforo sia libero
@@ -51,7 +49,7 @@ int main (int argc, char * argv[]){
     int i, j;
     pthread_t thread[N];
     
-    
+    srand(time(NULL));
     
     /*
     * Inizializzo i semafori ad 1 (libero)
