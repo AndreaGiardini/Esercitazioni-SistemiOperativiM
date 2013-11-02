@@ -2,29 +2,40 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+//Numero persone
 #define N 10
+//Numero films
 #define K 5
 
+/*
+* Un sondaggio è composto da:
+*   - Un id (num) del film
+*   - Un campo di voto per ognuno degli N utenti
+*/
 typedef struct sondaggio{
-    int num; //Numero sondaggio (di K)
+    int num;
     int voti[N];
 } sondaggio;
 
-static sem_t semph[K];
+//Inizializzo un sondaggio per ogni film
 sondaggio sondaggi[K];
+//Inizializzo un semaforo per ogni sondaggio
+static sem_t semph[K];
 
 void * user(void * t){
-
     int i, k;
     
     srand(time(NULL));
-    //Per ogni film attendo il semaforo e scrivo un voto
+    
+    //Per ogni film
     for(i=0; i < K; i++){
+        //Attendo che il semaforo sia libero
         sem_wait(&semph[i]);
         for(k=0; k < N; k++){
+            //Scrivo un voto random nella prima cella libera
             if(sondaggi[i].voti[k] == -1){
                 sondaggi[i].voti[k] = rand() % 10 + 1;
-                //printf("Voto: %d - con i = %d e K = %d\n", sondaggi[i].voti[k], i , k);
+                //printf("Thread %d - Voto: %d - con i = %d e K = %d\n", pthread_self(), sondaggi[i].voti[k], i , k);
                 break;
             }
         }
@@ -40,7 +51,11 @@ int main (int argc, char * argv[]){
     int i, j;
     pthread_t thread[N];
     
-    //Inizializzo i semafori
+    
+    
+    /*
+    * Inizializzo i semafori ad 1 (libero)
+    */
     for(i=0; i < K; i++){
         sem_init(&semph[i], 0, 1);
     }
@@ -59,8 +74,8 @@ int main (int argc, char * argv[]){
     }
 
     //Attendo la fine dei processi
-    for(i=0; i < K; i++){
-        pthread_join (thread[i], NULL);
+    for(i=0; i < N; i++){
+        pthread_join(thread[i], NULL);
     }
     
     //Stampo i risultati
