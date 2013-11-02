@@ -1,3 +1,5 @@
 FAQ
 
 * Come distinguo un thread da un altro visto che hanno tutti lo stesso PID?
+
+E' necessario utilizzare la fuzione pthread_self() per ricevere il ThreadIdentifier (TID)
