@@ -24,7 +24,7 @@ static sem_t semph[K];
 
 void * user(void * t){
     int i, k;
-    
+
     //Per ogni film
     for(i=0; i < K; i++){
         //Attendo che il semaforo sia libero
@@ -37,7 +37,7 @@ void * user(void * t){
                 break;
             }
         }
-        sem_post(&semph[i]);        
+        sem_post(&semph[i]);
     }
 
     pthread_exit (0); 
@@ -48,16 +48,16 @@ int main (int argc, char * argv[]){
 
     int i, j;
     pthread_t thread[N];
-    
+
     srand(time(NULL));
-    
+
     /*
     * Inizializzo i semafori ad 1 (libero)
     */
     for(i=0; i < K; i++){
         sem_init(&semph[i], 0, 1);
     }
-    
+
     //Inizializzo i sondaggi
     for(i=0; i < K; i++){
         sondaggi[i].num=i;
@@ -65,7 +65,7 @@ int main (int argc, char * argv[]){
             sondaggi[i].voti[j]=-1;
         }
     }
-    
+
     //Per ogni utente avvio un processo
     for(i=0; i < N; i++){
         pthread_create(&thread[i],NULL,user, NULL);
@@ -75,7 +75,7 @@ int main (int argc, char * argv[]){
     for(i=0; i < N; i++){
         pthread_join(thread[i], NULL);
     }
-    
+
     //Stampo i risultati
     for(i=0; i < K; i++){
         float sum=0;
