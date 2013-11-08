@@ -1,0 +1,31 @@
+
+     - LinuxThreads
+
+Inclusione del file header pthread.h
+Rappresentazione come pthread_t tid
+
+    * Creazione Thread:
+```c
+int pthread_create(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine)(void *), void * arg); 
+```
+ - thread - puntatore che raccoglierà il thread_id
+ - attr - utilizzato per specificare eventuali attributi (solitamente NULL)
+ - start_routine - puntatore alla funzione che contiene il codice da eseguire
+ - arg - vettore contenente paramentri da passare alla funzione
+
+Ritorna 0 in caso di successo, != 0 altrimenti.
+
+    * Terminazione di Thread:
+```c
+void pthread_exit(void *retval);
+```
+ - retval - puntatore al valore di ritorno (ottenibile nel main da pthread_join)
+
+    * Sincronizzazione con la terminazione:
+```c
+int pthread_join(pthread_t th, void **thread_return);
+```
+ - th - tid del thread da attendere
+ - thread_return - viene memorizzato qui il valore di ritorno del thread
+
+Se il ritorno è != 0 allora è fallita.
