@@ -41,8 +41,10 @@ void * user(void * t){
         sem_post(&semph[i]);
     }
 
-    sem_post(barriera);
-    //Attendo fino a quando tutti i thread non hanno valutato il film
+    //Di default si bloccano tutti
+    sem_wait(barriera);
+
+
 
     pthread_exit (0); 
 
@@ -61,8 +63,8 @@ int main (int argc, char * argv[]){
     for(i=0; i < K; i++){
         sem_init(&semph[i], 0, 1);
     }
-    //Semaforo di barriera con il numero di utenti
-    sem_init(barriera, 0, N);
+    //Semaforo di barriera come bloccante
+    sem_init(barriera, 0, 0);
 
     //Inizializzo i sondaggi
     for(i=0; i < K; i++){
