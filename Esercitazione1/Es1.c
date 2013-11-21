@@ -25,14 +25,15 @@ int el_num = NUM_EL / NUM_TH;
 
 void* thread_work(void* t){
     int* elements = (int*) t;
-    int i,result=0;
+    int i;
+    long result=0;
 
     for(i=0; i < el_num; i++){
         if(elements[i] > result){
             result = elements[i];
-        }    
+        }
     }
-    
+
     pthread_exit((void*) result); 
 }
 
@@ -41,10 +42,9 @@ void main (int argc, char* argv[]){
     int i, elements[NUM_EL], rc;
     void* status;
     pthread_t thread[NUM_TH];
-    long t;
-    
+
     printf("Elements number: %d\nMax random number: %d\nThreads number: %d\n", NUM_EL, MAX_RND_NUM, NUM_TH);
-    
+
     //Inizializzazione del vettore
     printf("\nElements List:\n");
     srand(time(NULL));
@@ -52,32 +52,32 @@ void main (int argc, char* argv[]){
         elements[i]= rand() % MAX_RND_NUM;
         printf("%d\t", elements[i]);
     }
-    
+
     //Creazione Threads
     for(i=0; i < NUM_TH ; i++){
         rc = pthread_create(&thread[i], NULL, thread_work, (void *)elements + sizeof(int)*el_num*i); 
         if (rc) { 
             printf("ERRORE: %d\n", rc); 
             exit(-1);
-        }   
+        }
     }
-    
+
     printf("\n\n");
     //Join Threads and calculate maximum
-    int max=0;
+    long max=0;
     for(i=0; i < NUM_TH ; i++){
         rc = pthread_join(thread[i], &status); 
         if (rc){
-            printf("ERRORE join thread &d codice %d\n", t, rc); 
+            printf("ERRORE join thread %d codice %d\n", i, rc); 
         }else{
             printf("Finito thread con ris. %ld\n",(long)status);
             if((long)status > max){
-                max = (int)status;
+                max = (long)status;
             }
         }
     }
-    
+
     //Result
-    printf("\nMaximum is: %d", max);
-    
+    printf("\nMaximum is: %lu", max);
+
 }
