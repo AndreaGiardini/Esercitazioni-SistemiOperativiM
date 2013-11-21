@@ -17,10 +17,14 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define MAX_RND_NUM 50  //Massimo numero random
-#define NUM_EL 10       //Numero di elementi
-#define NUM_TH 5        //Numero di Thread
+#define MAX_RND_NUM 50  /* Massimo numero random */
+#define NUM_EL 10       /* Numero di elementi */
+#define NUM_TH 5        /* Numero di Thread */
 
+/*
+* Numero di elementi per thread
+* TODO: Prevedere il caso con NUM_EL % NUM_TH != 0
+*/
 int el_num = NUM_EL / NUM_TH;
 
 void* thread_work(void* t){
@@ -37,15 +41,22 @@ void* thread_work(void* t){
     pthread_exit((void*) result); 
 }
 
-void main (int argc, char* argv[]){
+int main (int argc, char* argv[]){
 
+    /*
+    * i - Indice
+    * elements - Lista elementi
+    * rc - Esito primitive
+    * status - Codici di ritorno
+    * thread - Lista thread
+    */
     int i, elements[NUM_EL], rc;
     void* status;
     pthread_t thread[NUM_TH];
 
-    printf("Elements number: %d\nMax random number: %d\nThreads number: %d\n", NUM_EL, MAX_RND_NUM, NUM_TH);
+    printf("Numero di elementi: %d\nNumero casuale massimo: %d\nNumero di thread: %d\n", NUM_EL, MAX_RND_NUM, NUM_TH);
 
-    //Inizializzazione del vettore
+    /* Inizializzazione del vettore e stampa */
     printf("\nElements List:\n");
     srand(time(NULL));
     for(i=0; i < NUM_EL; i++){
@@ -53,17 +64,18 @@ void main (int argc, char* argv[]){
         printf("%d\t", elements[i]);
     }
 
-    //Creazione Threads
+    /* Creazione Threads */
     for(i=0; i < NUM_TH ; i++){
+        /* Passo al thread i numeri da prendere modificando l'indice dell'array' */
         rc = pthread_create(&thread[i], NULL, thread_work, (void *)elements + sizeof(int)*el_num*i); 
         if (rc) { 
             printf("ERRORE: %d\n", rc); 
             exit(-1);
         }
     }
-
     printf("\n\n");
-    //Join Threads and calculate maximum
+
+    /* Join e calcolo del massimo */
     long max=0;
     for(i=0; i < NUM_TH ; i++){
         rc = pthread_join(thread[i], &status); 
@@ -77,7 +89,9 @@ void main (int argc, char* argv[]){
         }
     }
 
-    //Result
+    /* Risultato */
     printf("\nMaximum is: %lu", max);
+
+    return 0;
 
 }
