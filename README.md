@@ -11,4 +11,4 @@ gcc -D_REENTRANT -o prog prog.c -lpthread
 
 Per comodità sono solito eseguire: (es. Es1.c)
 
-watch "clear && gcc -Wall -D_REETRANT -lpthread -o Es1.exe Es1.c && ./Es1.exe"
+watch "gcc -Wall -D_REETRANT -lpthread -o Es1.exe Es1.c && ./Es1.exe"
