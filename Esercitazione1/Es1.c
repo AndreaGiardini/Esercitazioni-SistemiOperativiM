@@ -17,24 +17,34 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define MAX_RND_NUM 50  /* Massimo numero random */
-#define NUM_EL 10       /* Numero di elementi */
-#define NUM_TH 5        /* Numero di Thread */
+#define MAX_RND_NUM 1050    /* Massimo numero random */
+#define NUM_EL 100          /* Numero di elementi */
+#define NUM_TH 20           /* Numero di Thread */
+
+/*
+* Lista elementi
+*/
+int elements[NUM_EL];
 
 /*
 * Numero di elementi per thread
-* TODO: Prevedere il caso con NUM_EL % NUM_TH != 0
 */
-int el_num = NUM_EL / NUM_TH;
+int el_num[NUM_TH];
 
 void* thread_work(void* t){
-    int* elements = (int*) t;
-    int i;
+    long tid = (long) t;
+    int i, displ=0;
     long result=0;
 
-    for(i=0; i < el_num; i++){
-        if(elements[i] > result){
-            result = elements[i];
+    /* Displacement */
+    for(i=0; i < tid; i++){
+        displ += el_num[i];
+    }
+
+    for(i=0; i < el_num[tid]; i++){
+        /* printf("Thread id: %ld - Displacement: %d - Number : %d\n", tid, displ, elements[displ+i]); */
+        if(elements[displ+i] > result){
+            result = elements[displ+i];
         }
     }
 
@@ -45,12 +55,12 @@ int main (int argc, char* argv[]){
 
     /*
     * i - Indice
-    * elements - Lista elementi
     * rc - Esito primitive
     * status - Codici di ritorno
     * thread - Lista thread
     */
-    int i, elements[NUM_EL], rc;
+    long i;
+    int rc;
     void* status;
     pthread_t thread[NUM_TH];
 
@@ -63,24 +73,38 @@ int main (int argc, char* argv[]){
         elements[i]= rand() % MAX_RND_NUM;
         printf("%d\t", elements[i]);
     }
+    printf("\n");
+
+    /* Calcolo il numero di elementi che deve processare ogni thread */
+    for(i=0; i < NUM_TH; i++){
+        el_num[i] = NUM_EL / NUM_TH;
+    }
+
+    if (NUM_EL % NUM_TH != 0){
+        for(i=0; i < NUM_EL % NUM_TH; i++){
+            el_num[i]++;
+        }
+    }
 
     /* Creazione Threads */
     for(i=0; i < NUM_TH ; i++){
-        /* Passo al thread i numeri da prendere modificando l'indice dell'array' */
-        rc = pthread_create(&thread[i], NULL, thread_work, (void *)elements + sizeof(int)*el_num*i); 
+        //printf("LOL - %lu\n", i);
+        /* Passo al thread il suo indice */
+        rc = pthread_create(&thread[i], NULL, thread_work, (void*)i); 
         if (rc) { 
             printf("ERRORE: %d\n", rc); 
             exit(-1);
         }
     }
-    printf("\n\n");
+
+    printf("\n");
 
     /* Join e calcolo del massimo */
     long max=0;
     for(i=0; i < NUM_TH ; i++){
         rc = pthread_join(thread[i], &status); 
         if (rc){
-            printf("ERRORE join thread %d codice %d\n", i, rc); 
+            printf("ERRORE join thread %lu codice %d\n", i, rc); 
         }else{
             printf("Finito thread con ris. %ld\n",(long)status);
             if((long)status > max){
