@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
-//Numero persone
+
+/* Numero persone */
 #define N 10
-//Numero films
+/* Numero films */
 #define K 5
 
 /*
@@ -17,20 +18,19 @@ typedef struct sondaggio{
     int voti[N];
 } sondaggio;
 
-//Inizializzo un sondaggio per ogni film
+/* Inizializzo un sondaggio per ogni film */
 sondaggio sondaggi[K];
-//Inizializzo un semaforo per ogni sondaggio
+/* Inizializzo un semaforo per ogni sondaggio */
 static sem_t semph[K];
 
 void * user(void * t){
     int i, k;
 
-    //Per ogni film
+    /* Per ogni film/sondaggio */
     for(i=0; i < K; i++){
-        //Attendo che il semaforo sia libero
         sem_wait(&semph[i]);
         for(k=0; k < N; k++){
-            //Scrivo un voto random nella prima cella libera
+            /* Scrivo un voto random nella prima cella libera */
             if(sondaggi[i].voti[k] == -1){
                 sondaggi[i].voti[k] = rand() % 10 + 1;
                 //printf("Thread %d - Voto: %d - con i = %d e K = %d\n", pthread_self(), sondaggi[i].voti[k], i , k);
@@ -51,14 +51,12 @@ int main (int argc, char * argv[]){
 
     srand(time(NULL));
 
-    /*
-    * Inizializzo i semafori ad 1 (libero)
-    */
+    /* Inizializzo i semafori ad 1 (libero) */
     for(i=0; i < K; i++){
         sem_init(&semph[i], 0, 1);
     }
 
-    //Inizializzo i sondaggi
+    /* Inizializzo i sondaggi */
     for(i=0; i < K; i++){
         sondaggi[i].num=i;
         for(j=0; j < N; j++){
@@ -66,17 +64,17 @@ int main (int argc, char * argv[]){
         }
     }
 
-    //Per ogni utente avvio un processo
+    /* Per ogni utente avvio un processo */
     for(i=0; i < N; i++){
-        pthread_create(&thread[i],NULL,user, NULL);
+        pthread_create(&thread[i], NULL, user, NULL);
     }
 
-    //Attendo la fine dei processi
+    /* Attendo la fine dei processi */
     for(i=0; i < N; i++){
         pthread_join(thread[i], NULL);
     }
 
-    //Stampo i risultati
+    /* Stampo i risultati */
     for(i=0; i < K; i++){
         float sum=0;
         printf("Media del film numero %d:\n", sondaggi[i].num);
@@ -88,4 +86,6 @@ int main (int argc, char * argv[]){
         sum /= N;
         printf("\nMedia: %.2f\n\n", sum);
     }
+
+    return 0;
 }
