@@ -7,8 +7,8 @@ Bologna.
 
 Per compilare questi programmi è necessario utilizzare la stringa:
 
-gcc -D_REENTRANT -o prog prog.c -lpthread
+gcc -Wall -D_REETRANT -lpthread *.c && ./a.out
 
 Per comodità sono solito eseguire: (es. Es1.c)
 
-watch "gcc -Wall -D_REETRANT -lpthread -o Es1.exe Es1.c && ./Es1.exe"
+watch "gcc -Wall -D_REETRANT -lpthread *.c && ./a.out"
