@@ -21,7 +21,12 @@ typedef struct sondaggio{
 sondaggio sondaggi[K];
 //Inizializzo un semaforo per ogni sondaggio
 static sem_t semph[K];
-static sem_t barriera;
+//Semaforo barriera, uno per thread
+static sem_t barr[N];
+//Film vincitore
+static int film;
+//Semaforo film
+static sem_t sem_film;
 
 void * user(void * t){
     int i, k;
@@ -63,6 +68,10 @@ int main (int argc, char * argv[]){
     for(i=0; i < K; i++){
         sem_init(&semph[i], 0, 1);
     }
+    for(i=0; i < N; i++){
+        sem_init(&barr[i], 0, N);
+    }
+    
     //Semaforo di barriera come bloccante
     sem_init(barriera, 0, 0);
 
