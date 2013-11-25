@@ -1,5 +1,8 @@
 #include "Lib.h"
 
+/*
+* Inizializzazione variabili
+*/
 void init(){
 	/*
 	* Mutex Init
@@ -19,15 +22,17 @@ void init(){
     /*
     * Barriera Init
     */
-    //sem_init(&B.mb,0,1);
-    //sem_init(&B.sb,0,0);
-    //B.arrivati=0;
-
+    /*
+    sem_init(&B.mb,0,1);
+    sem_init(&B.sb,0,0);
+    B.arrivati=0;
+    */
 }
 
 /*
 * Sincronizzazione barriera
 */
+/*
 void sync_barriera(){
     sem_wait(&B.mb);
     B.arrivati++; 
@@ -39,3 +44,4 @@ void sync_barriera(){
     sem_post(&B.sb);
     return;
 }
+*/

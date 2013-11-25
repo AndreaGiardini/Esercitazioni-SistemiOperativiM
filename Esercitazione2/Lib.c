@@ -4,7 +4,7 @@ void init(){
 	/*
 	* Mutex Init
 	*/
-	int i;
+	int i, j;
 	for(i=0; i < K; i++){
 	    pthread_mutex_init(&obj[i].lock, NULL);
 	}
@@ -26,11 +26,17 @@ void init(){
     //sem_init(&B.sb,0,0);
     //B.arrivati=0;
 
+    for(i=0; i < K; i++){
+        for(j=0; j < NUM_THREADS; j++){
+	        obj[i].voti[j]=-1;
+	    }
+    }
 }
 
 /*
 * Sincronizzazione barriera
 */
+/*
 void sync_barriera(){
     sem_wait(&B.mb);
     B.arrivati++; 
@@ -42,3 +48,4 @@ void sync_barriera(){
     sem_post(&B.sb);
     return;
 }
+*/

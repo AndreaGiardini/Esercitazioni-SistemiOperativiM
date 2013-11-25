@@ -23,11 +23,13 @@
 typedef enum { false, true } boolean;
 
 //Barriera
+/*
 typedef struct{
     sem_t mb;
     sem_t sb; 
     int arrivati;
 } barriera;
+*/
 
 //Struttura condivisa
 typedef struct{
@@ -39,8 +41,7 @@ typedef struct{
 * Definizione variabili
 */
 
-
-barriera B;
+//barriera B;
 sondaggio obj[K];
 
 /*
