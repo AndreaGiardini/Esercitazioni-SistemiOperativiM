@@ -12,42 +12,59 @@
 * Definizione costanti
 */
 
-//Numero utenti
 #define NUM_THREADS 5
-
-//Numero films
 #define K 10
-
 
 //Boolean
 typedef enum { false, true } boolean;
 
 //Barriera
-/*
+
 typedef struct{
     sem_t mb;
     sem_t sb; 
     int arrivati;
 } barriera;
-*/
 
-//Struttura condivisa
+//Sondaggio per ogni film
 typedef struct{
+    /*
+    * Definizione Lock
+    */
     pthread_mutex_t lock;
+    /*
+    * Voto di ogni utente
+    */
     int voti[NUM_THREADS];
+    /*
+    * Definizione semaforo
+    */
+    //sem_t sem;
+    /*
+    * Definizione condizione;
+    */
+	//pthread_cond_t coda;
 } sondaggio;
 
 /*
 * Definizione variabili
 */
 
-//barriera B;
-sondaggio obj[K];
+//Barriera
+barriera B;
+//Creo un sondaggio per ogni film
+sondaggio sondaggi[K];
+//Semaforo visione film
+pthread_mutex_t vediFilm;
+//Film vincitore
+extern int winner;
 
 /*
 * Dichiarazione funzioni
 */
 
 void init();
+void sync_barriera();
+void stampaVoti();
 
 #endif
