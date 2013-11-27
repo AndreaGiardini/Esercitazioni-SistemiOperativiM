@@ -17,17 +17,6 @@ void init(){
         }
     }
     pthread_mutex_init (&vediFilm, NULL);
-	//pthread_mutex_init (&obj.lock, NULL);
-
-    /*
-    * Semaphore Init (ultimo campo: valore iniziale)
-    */
-    //sem_init(&obj.sem, 0, 0);
-
-    /*
-    * Cond Init
-    */
-	//pthread_cond_init (&obj.coda, NULL);
 
     /*
     * Barriera Init

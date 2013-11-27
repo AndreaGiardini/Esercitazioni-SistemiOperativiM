@@ -36,14 +36,6 @@ typedef struct{
     * Voto di ogni utente
     */
     int voti[NUM_THREADS];
-    /*
-    * Definizione semaforo
-    */
-    //sem_t sem;
-    /*
-    * Definizione condizione;
-    */
-	//pthread_cond_t coda;
 } sondaggio;
 
 /*

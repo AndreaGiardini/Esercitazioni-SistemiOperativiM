@@ -7,7 +7,6 @@ void* thread_work(void* t){
     /*
     * Esecuzione thread
     */
-    //printf("Thread id: %d\n", elements);
     srand(time(NULL)+elements);
     for(i=0; i < K; i++){
         pthread_mutex_lock(&sondaggi[i].lock);
@@ -77,9 +76,8 @@ int main(int argc, char * argv[]){
     for(i=0; i < NUM_THREADS; i++){
         ret_code=pthread_join(thread[i], &status);
         if (ret_code){
-            //printf("ERRORE join thread %ld codice %d\n", i, ret_code); 
+            printf("ERRORE join thread %ld codice %d\n", i, ret_code); 
         }
-        //printf("Finito thread con ris. %ld\n",(long)status);
     }
 
     printf("Exit\n");
