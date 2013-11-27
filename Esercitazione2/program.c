@@ -76,7 +76,7 @@ int main(int argc, char * argv[]){
     for(i=0; i < NUM_THREADS; i++){
         ret_code=pthread_join(thread[i], &status);
         if (ret_code){
-            printf("ERRORE join thread %ld codice %d\n", i, ret_code); 
+            printf("ERRORE join thread %d codice %d\n", i, ret_code); 
         }
     }
 
