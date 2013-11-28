@@ -8,7 +8,3 @@ Bologna.
 Per compilare questi programmi è necessario utilizzare la stringa:
 
 gcc -Wall -D_REETRANT -lpthread *.c && ./a.out
-
-Per comodità sono solito eseguire: (es. Es1.c)
-
-watch "gcc -Wall -D_REETRANT -lpthread *.c && ./a.out"
