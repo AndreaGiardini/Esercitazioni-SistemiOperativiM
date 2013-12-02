@@ -12,45 +12,48 @@
 * Definizione costanti
 */
 
-#define NUM_THREADS 10
+#define NUM_THREADS 5
+#define NI 5
+#define MAX_PISTA 25
+#define MAX_GRUPPO 10
 
 //Boolean
-typedef enum { false, true } boolean;
-
-//Barriera
-typedef struct{
-    sem_t mb;
-    sem_t sb; 
-    int arrivati;
-} barriera;
+typedef enum { false, true } bool;
 
 //Struttura condivisa
 typedef struct{
     /*
     * Definizione Lock
     */
-    //pthread_mutex_t lock;
+    pthread_mutex_t lock;
     /*
-    * Definizione semaforo
+    * Definizione condizione (code);
     */
-    //sem_t sem;
-    /*
-    * Definizione condizione;
-    */
-	//pthread_cond_t coda;
-} sharedObj;
+	pthread_cond_t codaP_IN[MAX_GRUPPO];
+    pthread_cond_t codaE_IN[MAX_GRUPPO];
+    pthread_cond_t codaP_OUT[MAX_GRUPPO];
+
+    //Stato delle code
+    int sosp_codaP_IN[MAX_GRUPPO];
+    int sosp_codaE_IN[MAX_GRUPPO];
+    int sosp_codaP_OUT[MAX_GRUPPO];
+
+    //Stato della pista
+    int P_inPista;
+    int E_inPista;
+    int istr_inPista;
+} pista;
 
 /*
 * Definizione variabili
 */
 
-barriera B;
-sharedObj obj;
+pista ps;
 
 /*
 * Dichiarazione funzioni
 */
 
-void initObj(sharedObj *obj);
+void init();
 
 #endif

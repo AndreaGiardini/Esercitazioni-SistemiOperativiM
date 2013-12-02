@@ -1,41 +1,29 @@
 #include "Lib.h"
 
+/*
+* Inizializzazione variabili
+*/
 void init(){
 	/*
 	* Mutex Init
 	*/
-	//pthread_mutex_init (&obj.lock, NULL);
-
-    /*
-    * Semaphore Init (ultimo campo: valore iniziale)
-    */
-    //sem_init(&obj.sem, 0, 0);
+	pthread_mutex_init (&ps.lock, NULL);
 
     /*
     * Cond Init
     */
-	//pthread_cond_init (&obj.coda, NULL);
-
-    /*
-    * Barriera Init
-    */
-    //sem_init(&B.mb,0,1);
-    //sem_init(&B.sb,0,0);
-    //B.arrivati=0;
-
-}
-
-/*
-* Sincronizzazione barriera
-*/
-void sync_barriera(){
-    sem_wait(&B.mb);
-    B.arrivati++; 
-    if (B.arrivati==NUM_THREADS){
-        sem_post(&B.sb);
+    int i;
+    for(i=0; i < MAX_GRUPPO; i++){
+        pthread_cond_init (&ps.codaP_IN[i], NULL);
+        pthread_cond_init (&ps.codaE_IN[i], NULL);
+        pthread_cond_init (&ps.codaP_OUT[i], NULL);
+        ps.sosp_codaP_IN[i] = 0;
+        ps.sosp_codaE_IN[i] = 0;
+        ps.sosp_codaP_OUT[i] = 0;
     }
-    sem_post(&B.mb);
-    sem_wait(&B.sb); 
-    sem_post(&B.sb);
-    return;
+
+    ps.P_inPista = 0;
+    ps.E_inPista = 0;
+    ps.istr_inPista = 0;
+
 }
