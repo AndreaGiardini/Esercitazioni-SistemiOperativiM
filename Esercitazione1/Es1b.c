@@ -80,8 +80,8 @@ int main (int argc, char* argv[])
 	// Creazione casuale degli elementi
 	for(i=0; i < N; i++)
 	{
-			B[i]= rand() % MAX_RND_NUM;
-			printf("%d\t", B[i]);
+		B[i]= rand() % MAX_RND_NUM;
+		printf("%d\t", B[i]);
 	}
 	printf("\n");
 
