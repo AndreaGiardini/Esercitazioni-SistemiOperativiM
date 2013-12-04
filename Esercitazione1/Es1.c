@@ -52,7 +52,7 @@ void* thread_work(void* t)
 int main (int argc, char* argv[])
 {
 	// indice
-	long i;
+	int i;
 	// esito primitive
 	int rc;
 	// status - Codici di ritorno
@@ -95,34 +95,34 @@ int main (int argc, char* argv[])
 		// In caso di errore, stampa e termina        
 		if (rc) 
 		{
-				printf("ERRORE: %d\n", rc);
-				exit(-1);
+			printf("ERRORE: %d\n", rc);
+			exit(-1);
 		}
 	}
 
 	printf("\n");
 
 	/* Join e calcolo del massimo */
-	long max=0;
+	int max=0;
 	for(i=0; i < NUM_TH ; i++)
 	{
 		rc = pthread_join(thread[i], &status);
 		if (rc)
 		{
-			printf("ERRORE join thread %lu codice %d\n", i, rc);
+			printf("ERRORE join thread %d codice %d\n", i, rc);
 		}
 		else
 		{
-			printf("Finito thread con ris. %ld\n",(long)status);
+			printf("Finito thread %d con ris. %d\n", i, (int)(intptr_t)status);
 
 			// Al termine di ogni Thread, se ha trovato un massimo più alto, consideralo il massimo
-			if((long)status > max)
-				max = (long)status;
+			if((int)(intptr_t)status > max)
+				max = (int)(intptr_t)status;
 		}
 	}
 
 	/* Risultato */
-	printf("\nMaximum is: %lu\n", max);
+	printf("\nMaximum is: %d\n", max);
 
 	return 0;
 }
