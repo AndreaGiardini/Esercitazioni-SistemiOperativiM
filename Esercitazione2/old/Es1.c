@@ -31,8 +31,6 @@ void printResults()
 	// Per ogni film
 	for(i=0; i<K; i++)
 	{
-		//printf("Media del film numero %d:\n", i);
-		//printf("Voti: ");
 		// Stampo la media attuale
 		for(j=0, sum=0; j<N; j++)
 		{
@@ -40,7 +38,6 @@ void printResults()
 			if(G.risultatiSondaggi[i][j]!=0)
 			{
 				sum+=G.risultatiSondaggi[i][j];
-				//printf("\t%d", G.risultatiSondaggi[i][j]);
 			}
 		}
 		G.avg[i] = (float)sum/G.n;
