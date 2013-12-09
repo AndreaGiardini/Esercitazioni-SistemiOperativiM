@@ -2,3 +2,5 @@
 */.cproject
 *.exe
 *.out
+*.ali
+*.o
