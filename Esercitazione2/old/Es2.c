@@ -1,108 +1,205 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
-//Numero persone
+#include <unistd.h>
+
+// Numero persone che partecipano al sondaggio
 #define N 10
-//Numero films
+// Numero persone che guardano il film senza partecipare al sondaggio
+#define F 7
+// Numero films
 #define K 5
+// Numero massimo utenti a vedere il film
+#define MAXC 3
 
-/*
-* Un sondaggio è composto da:
-*   - Un id (num) del film
-*   - Un campo di voto per ognuno degli N utenti
-*/
-typedef struct sondaggio{
-    int num;
-    int voti[N];
-} sondaggio;
+// Gestore dei sondaggi
+typedef struct gestore {
+	pthread_mutex_t mutex; // Per la mutua esclusione all'accesso dei sondaggi
+	/* 
+	* Tabella dei voti
+	*	Abbiamo K film con N voti
+	*/
+	int risultatiSondaggi[K][N];	
+	int n; // Numero sondaggi effettuati finora
+	float avg[K]; // Medie voti dei film
+	int bestFilm;	
 
-//Inizializzo un sondaggio per ogni film
-sondaggio sondaggi[K];
-//Inizializzo un semaforo per ogni sondaggio
-static sem_t semph[K];
-//Semaforo barriera, uno per thread
-static sem_t barr[N];
-//Film vincitore
-static int film;
-//Semaforo film
-static sem_t sem_film;
+	sem_t semph; // Semaforo per la visione del film
+	int in_visione_film; // Numero di persone che stanno guardando il film
+	int in_attesa_film; // Numero di persone in attesa di guardare il film
+} gestore;
 
-void * user(void * t){
-    int i, k;
+gestore G;
 
-    //Per ogni film
-    for(i=0; i < K; i++){
-        //Attendo che il semaforo sia libero
-        sem_wait(&semph[i]);
-        for(k=0; k < N; k++){
-            //Scrivo un voto random nella prima cella libera
-            if(sondaggi[i].voti[k] == -1){
-                sondaggi[i].voti[k] = rand() % 10 + 1;
-                //printf("Thread %d - Voto: %d - con i = %d e K = %d\n", pthread_self(), sondaggi[i].voti[k], i , k);
-                break;
-            }
-        }
-        sem_post(&semph[i]);
-    }
-
-    //Di default si bloccano tutti
-    sem_wait(barriera);
-
-
-
-    pthread_exit (0); 
-
+void printResults()
+{
+	int i, j, sum;
+	
+	// Per ogni film
+	for(i=0; i<K; i++)
+	{
+		//printf("Media del film numero %d:\n", i);
+		//printf("Voti: ");
+		// Stampo la media attuale
+		for(j=0, sum=0; j<N; j++)
+		{
+			// Se il voto è 0, non è stato ancora assegnato, quindi non calcolarlo per la media
+			if(G.risultatiSondaggi[i][j]!=0)
+			{
+				sum+=G.risultatiSondaggi[i][j];
+				//printf("\t%d", G.risultatiSondaggi[i][j]);
+			}
+		}
+		G.avg[i] = (float)sum/G.n;
+		printf("Risultati dopo %d sondaggi:\n", G.n);
+		printf("Film %i ha una media voto di: %.2f\n", i, G.avg[i]);
+	}
+	printf("\n\n");
 }
 
-int main (int argc, char * argv[]){
+void printBestFilm()
+{
+	int i;
+	float maxAvg=1;
+	for (i=0; i<K; i++)
+		if (G.avg[i]>maxAvg)
+		{
+			G.bestFilm=i;
+			maxAvg=G.avg[i];
+		}
 
-    int i, j;
-    pthread_t thread[N];
+	printf("Il miglior film della stagione è stato il film %i con una media voto di: %.2f\n", G.bestFilm, maxAvg);
+}
 
-    srand(time(NULL));
+void * filmUser(void * t)
+{
+	int tid = (intptr_t) t;
+	
+	// Se ancora non è finito il sondaggio, aspetta l'inizio
+	if(G.n!=N)
+	{
+		G.in_attesa_film++;
+		pthread_mutex_unlock(&G.mutex);
+		
+		// Si blocca fintanto che non verrà risvegliato da qualcuno
+		sem_wait(&G.semph);
 
-    /*
-    * Inizializzo i semafori ad 1 (libero)
-    */
-    for(i=0; i < K; i++){
-        sem_init(&semph[i], 0, 1);
-    }
-    for(i=0; i < N; i++){
-        sem_init(&barr[i], 0, N);
-    }
-    
-    //Semaforo di barriera come bloccante
-    sem_init(barriera, 0, 0);
+		pthread_mutex_lock(&G.mutex);
+		// Si toglie dall'attesa
+		G.in_attesa_film--;
 
-    //Inizializzo i sondaggi
-    for(i=0; i < K; i++){
-        sondaggi[i].num=i;
-        for(j=0; j < N; j++){
-            sondaggi[i].voti[j]=-1;
-        }
-    }
+		pthread_mutex_unlock(&G.mutex);
+	}	
 
-    //Per ogni utente avvio un processo
-    for(i=0; i < N; i++){
-        pthread_create(&thread[i],NULL,user, NULL);
-    }
+	// Se c'è posto in sala, risveglia processi finchè c'è posto
+	while(G.in_attesa_film>0 && G.in_visione_film<MAXC-1)
+	{
+		pthread_mutex_lock(&G.mutex);
+		G.in_visione_film++;
+		sem_post(&G.semph);
+		pthread_mutex_unlock(&G.mutex);
+	}	
 
-    //Attendo la fine dei processi
-    for(i=0; i < N; i++){
-        pthread_join(thread[i], NULL);
-    }
+	printf("Persona %d ha iniziato la visione del film\n", tid);
+	sleep(2);	
+	printf("Persona %d ha finito di guardare il film\n", tid);
 
-    //Stampo i risultati
-    for(i=0; i < K; i++){
-        float sum=0;
-        printf("Media del film numero %d:\n", sondaggi[i].num);
-        printf("Voti: ");
-        for(j=0; j < N; j++){
-            sum += sondaggi[i].voti[j];
-            printf("\t%d", sondaggi[i].voti[j]);
-        }
-        sum /= N;
-        printf("\nMedia: %.2f\n\n", sum);
-    }
+	pthread_mutex_lock(&G.mutex);	
+	G.in_visione_film--;
+	pthread_mutex_unlock(&G.mutex);
+
+	// Risveglia un processo se ce n'è almeno uno in coda
+	if(G.in_attesa_film>0 && G.in_visione_film<MAXC-1)
+	{
+		pthread_mutex_lock(&G.mutex);
+		G.in_visione_film++;
+		sem_post(&G.semph);
+		pthread_mutex_unlock(&G.mutex);
+	}
+}
+
+void * sondaggioUser(void * t)
+{
+	int tid = (intptr_t) t; //thread-id
+	int i;
+	pthread_mutex_lock(&G.mutex);
+
+	// Per ogni film
+	for(i=0; i < K; i++)
+	{	
+		// Assegno un voto
+		G.risultatiSondaggi[i][tid] = (rand() % 10) + 1;
+		printf("Persona %d - Voto: %d al film %d\n", tid, G.risultatiSondaggi[i][tid], i);
+	}
+
+	// Incremento il numero dei sondaggi effettuati
+	G.n++;
+	printResults();
+
+	if(G.n!=N)
+	{
+		G.in_attesa_film++;
+		pthread_mutex_unlock(&G.mutex);
+		
+		// Si blocca fintanto che non verrà risvegliato da qualcuno
+		sem_wait(&G.semph);
+
+		pthread_mutex_lock(&G.mutex);
+		// Si toglie dall'attesa
+		G.in_attesa_film--;
+
+		pthread_mutex_unlock(&G.mutex);
+	}
+	else // Il thread che entra qui è l'ultimo, ovvero quello che si occupa del calcolo del miglior film
+	{
+		printBestFilm();
+	
+		// Una volta calcolato il miglior film
+		// tutti i thread possono iniziarne la visione		
+		printf("Le proiezioni del film %d iniziano ora, massimo %d persone per volta\n\n", G.bestFilm, MAXC);	
+	}
+	pthread_mutex_unlock(&G.mutex);
+
+	// Vedi il film	
+	filmUser(t);
+	
+	pthread_exit (0); 
+}
+
+int main (int argc, char * argv[])
+{
+	int i, j;
+	
+	// Il numero dei thread è dato dalla somma dei partecipanti al sondaggio più i soli spettatori del film
+	pthread_t thread[N+F];
+
+	// Randomizzo
+	srand(time(NULL));
+	/* inizializzazione G: */
+	pthread_mutex_init(&G.mutex, NULL); 
+	G.n=0;
+	// Inizializzo il semaforo per la visione dei film a 0 ->
+	// non è possibile guardare il film fintanto che non è stato decretato il film vincitore
+	sem_init(&G.semph, 0, 0);
+	
+	// Inizializzo tutti i voti a zero
+	for(i=0; i < K; i++)
+		for(j=0; j < N; j++)
+			G.risultatiSondaggi[K][N]=0;
+
+	// Per ogni partecipante al sondaggio avvio un processo 
+	for(i=0; i < N; i++)
+		pthread_create(&thread[i], NULL, sondaggioUser, (void*)(intptr_t)i);
+	
+	// Per ogni mero spettatore del film avvio un processo 
+	for(i=N; i < N+F; i++)
+		pthread_create(&thread[i], NULL, filmUser, (void*)(intptr_t)i);
+	
+	// Attendo la fine di tutti processi 
+	for(i=0; i < N+F; i++)
+		pthread_join(thread[i], NULL);
+	
+	return 0;
 }
