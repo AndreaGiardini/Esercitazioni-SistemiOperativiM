@@ -5,23 +5,13 @@
 #include <semaphore.h>
 
 // Numero persone
-<<<<<<< HEAD
 #define N 10
 // Numero films
 #define K 5
-=======
-#define N 5
-// Numero films
-#define K 3
->>>>>>> upstream/master
 
 // Gestore dei sondaggi
 typedef struct gestoreSondaggi {
 	pthread_mutex_t mutex; // Per la mutua esclusione all'accesso dei sondaggi
-<<<<<<< HEAD
-=======
-	sem_t semph; // Semaforo
->>>>>>> upstream/master
 	/* 
 	* Tabella dei voti
 	*	Abbiamo K film con N voti
@@ -75,11 +65,6 @@ void * user(void * t)
 	int tid = (intptr_t) t; //thread-id
 	int i;
 	pthread_mutex_lock(&G.mutex);
-<<<<<<< HEAD
-=======
-
-	sem_post(&G.semph); // Attiva il semaforo
->>>>>>> upstream/master
 	// Per ogni film
 	for(i=0; i < K; i++)
 	{	
@@ -92,10 +77,6 @@ void * user(void * t)
 	G.n++;
 	printResults();
 	
-<<<<<<< HEAD
-=======
-	sem_post(&G.semph); // rilascia il semaforo
->>>>>>> upstream/master
 	pthread_mutex_unlock(&G.mutex);
 	pthread_exit (0); 
 }
@@ -111,7 +92,6 @@ int main (int argc, char * argv[])
 	/* inizializzazione G: */
 	pthread_mutex_init(&G.mutex, NULL); 
 	G.n=0;
-<<<<<<< HEAD
 
 	// Inizializzo tutti i voti a zero
 	for(i=0; i < K; i++)
@@ -125,32 +105,6 @@ int main (int argc, char * argv[])
 	// Attendo la fine dei processi 
 	for(i=0; i < N; i++)
 		pthread_join(thread[i], NULL);
-=======
-	// Inizializzo tutti i semafori ad 1 (libero)
-	for(i=0; i < K; i++)
-	{
-		sem_init(&G.semph, 0, 1);
-	}
-	
-	// Inizializzo tutti i voti a zero
-	for(i=0; i < K; i++)
-	{
-		for(j=0; j < N; j++)
-			G.risultatiSondaggi[K][N]=0;
-	}
-
-	// Per ogni utente avvio un processo 
-	for(i=0; i < N; i++)
-	{
-		pthread_create(&thread[i], NULL, user, (void*)(intptr_t)i);
-	}
-
-	// Attendo la fine dei processi 
-	for(i=0; i < N; i++)
-	{
-		pthread_join(thread[i], NULL);
-	}
->>>>>>> upstream/master
 
 	printBestFilm();
 
