@@ -36,8 +36,7 @@ void entra_donna(int tid){
     while(B.countUominiIn > 0 || B.countDonneIn == B.MAX){
         /*
         * Sospendo il processo
-        */
-        
+        */        
         B.sospDonne++;
         printf("Thread donna %d : sospeso\n", tid);
         pthread_mutex_unlock(&B.lock);
