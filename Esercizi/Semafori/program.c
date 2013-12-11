@@ -1,0 +1,128 @@
+#include "Lib.h"
+
+void entra_uomo(int tid){
+    pthread_mutex_lock(&B.lock);
+    while(B.countDonneIn > 0 || B.sospDonne > 0 || B.countUominiIn == B.MAX){
+        /*
+        * Sospendo il processo
+        */
+        B.sospUomini++;
+        printf("Thread uomo %d : sospeso\n", tid);
+        pthread_mutex_unlock(&B.lock);
+        
+        sem_wait(&B.uominiIn);
+        B.sospUomini--;
+        pthread_mutex_lock(&B.lock);
+    }
+    B.countUominiIn++;
+    printf("Thread uomo %d : entrato\n", tid);
+    pthread_mutex_unlock(&B.lock);
+}
+
+void esce_uomo(int tid){
+    pthread_mutex_lock(&B.lock);
+    B.countUominiIn--;
+    if(B.sospDonne > 0){
+        sem_post(&B.donneIn);
+    }else{
+        sem_post(&B.uominiIn);
+    }
+    printf("Thread uomo %d : uscito\n", tid);
+    pthread_mutex_unlock(&B.lock);
+}
+
+void entra_donna(int tid){
+    pthread_mutex_lock(&B.lock);
+    while(B.countUominiIn > 0 || B.countDonneIn == B.MAX){
+        /*
+        * Sospendo il processo
+        */
+        
+        B.sospDonne++;
+        printf("Thread donna %d : sospeso\n", tid);
+        pthread_mutex_unlock(&B.lock);
+        sem_wait(&B.donneIn);
+        B.sospDonne--;
+        pthread_mutex_lock(&B.lock);
+    }
+    B.countDonneIn++;
+    printf("Thread donna %d : entrato\n", tid);
+    pthread_mutex_unlock(&B.lock);
+}
+
+void esce_donna(int tid){
+    pthread_mutex_lock(&B.lock);
+    B.countDonneIn--;
+    if(B.sospDonne > 0){
+        sem_post(&B.donneIn);
+    }else{
+        sem_post(&B.uominiIn);
+    }
+    printf("Thread donna %d : uscito\n", tid);
+    pthread_mutex_unlock(&B.lock);
+}
+
+void* thread_work(void* t){
+    int tid = (intptr_t) t;
+
+    /*
+    * Esecuzione thread
+    */
+    //printf("Tid: %d\n", tid);
+
+    if (tid % 2 == 0){
+        /*
+        * Thread Uomo
+        */
+        entra_uomo(tid);
+        sleep(2);
+        esce_uomo(tid);
+    } else {
+        /*
+        * Thread Donna
+        */
+        entra_donna(tid);
+        sleep(2);
+        esce_donna(tid);
+    }
+
+    pthread_exit((void*)(intptr_t) tid);
+}
+
+int main(int argc, char * argv[]){
+
+    int i, ret_code;
+
+    void* status;
+    pthread_t thread[NUM_THREADS];
+
+    /*
+    * Inizializzazione risorse
+    */
+    init();
+
+    /*
+    * Creazione threads
+    */
+    for(i=0; i < NUM_THREADS; i++){
+        ret_code=pthread_create(&thread[i], NULL, thread_work, (void *) (intptr_t) i);
+        if (ret_code) { 
+            printf("ERRORE: %d\n", ret_code); 
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /*
+    * Join threads
+    */
+    for(i=0; i < NUM_THREADS; i++){
+        ret_code=pthread_join(thread[i], &status);
+        if (ret_code){
+            printf("ERRORE join thread %d codice %d\n", i, ret_code); 
+        }
+        //printf("Finito thread con ris. %d\n",(int)(intptr_t)status);
+    }
+
+
+    return EXIT_SUCCESS;
+}
