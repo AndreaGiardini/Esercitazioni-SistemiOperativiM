@@ -53,6 +53,7 @@ sharedObj obj;
 * Dichiarazione funzioni
 */
 
+//void sync_barriera();
 void init();
 
 #endif
