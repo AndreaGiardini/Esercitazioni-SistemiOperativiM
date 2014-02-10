@@ -13,12 +13,18 @@
 */
 
 #define NUM_THREADS 10
-#define MAX_PONTE 4
+#define MaxG 10
+#define MAXF 10
+
+#define T1 0
+#define T2 1
+#define STANDARD 0
+#define SPECIALI 1
+#define TEMPBASSA 0
+#define TEMPALTA 1
 
 //Boolean
 typedef enum { false, true } boolean;
-typedef enum { dx, sx } direzione;
-typedef enum { magri, grassi } utente;
 
 //Struttura condivisa
 typedef struct{
@@ -29,29 +35,23 @@ typedef struct{
     /*
     * Definizione condizione;
     */
-	pthread_cond_t coda[2][2];
-    int sospesi[2][2];
+	pthread_cond_t coda[2][2][MaxG];
+	int sosp[2][2][MaxG];
 
-    int inTransito[2][2];
-
-} ponte;
+    int inForno;
+    int temperatura;
+} forno;
 
 /*
 * Definizione variabili
 */
 
-ponte P;
+forno F;
 
 /*
 * Dichiarazione funzioni
 */
 
 void init();
-boolean ePieno();
-char* getDirezione(direzione dir);
-char* getUtente(utente usr);
-direzione dirOpposta(direzione dir);
-utente utenteOpposto(utente usr);
-void risveglioThread(utente tipo, direzione dir);
 
 #endif

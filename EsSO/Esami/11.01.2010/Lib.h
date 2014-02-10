@@ -12,13 +12,18 @@
 * Definizione costanti
 */
 
-#define NUM_THREADS 10
-#define MAX_PONTE 4
+#define NUM_THREADS 20
+
+#define N1 5
+#define N2 5
+
+#define MA 0
+#define MI 1
+#define C1 0
+#define C2 1
 
 //Boolean
 typedef enum { false, true } boolean;
-typedef enum { dx, sx } direzione;
-typedef enum { magri, grassi } utente;
 
 //Struttura condivisa
 typedef struct{
@@ -30,28 +35,22 @@ typedef struct{
     * Definizione condizione;
     */
 	pthread_cond_t coda[2][2];
-    int sospesi[2][2];
+	int sosp[2][2];
 
-    int inTransito[2][2];
-
-} ponte;
+    int C1inPista;
+    int C2inPista;
+} pista;
 
 /*
 * Definizione variabili
 */
 
-ponte P;
+pista ps;
 
 /*
 * Dichiarazione funzioni
 */
 
 void init();
-boolean ePieno();
-char* getDirezione(direzione dir);
-char* getUtente(utente usr);
-direzione dirOpposta(direzione dir);
-utente utenteOpposto(utente usr);
-void risveglioThread(utente tipo, direzione dir);
 
 #endif

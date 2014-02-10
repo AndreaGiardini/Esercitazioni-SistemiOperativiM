@@ -13,12 +13,14 @@
 */
 
 #define NUM_THREADS 10
-#define MAX_PONTE 4
+
+#define SENIOR 0
+#define STANDARD 1
+#define USCITA 0
+#define ENTRATA 1
 
 //Boolean
 typedef enum { false, true } boolean;
-typedef enum { dx, sx } direzione;
-typedef enum { magri, grassi } utente;
 
 //Struttura condivisa
 typedef struct{
@@ -30,28 +32,24 @@ typedef struct{
     * Definizione condizione;
     */
 	pthread_cond_t coda[2][2];
-    int sospesi[2][2];
+	int sosp[2][2];
 
-    int inTransito[2][2];
+    boolean cabinaOccupata;
 
-} ponte;
+    int inBanca, maxBanca;
+} CabinaBanca;
 
 /*
 * Definizione variabili
 */
 
-ponte P;
+CabinaBanca CB;
 
 /*
 * Dichiarazione funzioni
 */
 
 void init();
-boolean ePieno();
-char* getDirezione(direzione dir);
-char* getUtente(utente usr);
-direzione dirOpposta(direzione dir);
-utente utenteOpposto(utente usr);
-void risveglioThread(utente tipo, direzione dir);
+boolean bancaPiena();
 
 #endif

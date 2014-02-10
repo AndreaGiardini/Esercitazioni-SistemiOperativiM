@@ -1,6 +1,16 @@
 #include "Lib.h"
 
 /*
+* Risveglio thread
+*/
+void risveglioThread(utente tipo, direzione dir){
+    pthread_cond_signal(&P.coda[tipo][dir]);
+    pthread_cond_signal(&P.coda[utenteOpposto(tipo)][dir]);
+    pthread_cond_signal(&P.coda[magri][dirOpposta(dir)]);
+    pthread_cond_signal(&P.coda[grassi][dirOpposta(dir)]);
+}
+
+/*
 * Ritorna l'utente opposto
 */
 utente utenteOpposto(utente usr){

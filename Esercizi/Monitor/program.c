@@ -49,12 +49,8 @@ void* thread_work(void* t){
     P.inTransito[tipo][dir]++;
 
     //Risveglio thread
-    pthread_cond_signal(&P.coda[tipo][dir]);
-    pthread_cond_signal(&P.coda[utenteOpposto(tipo)][dir]);
-    pthread_cond_signal(&P.coda[magri][dirOpposta(dir)]);
-    pthread_cond_signal(&P.coda[grassi][dirOpposta(dir)]);
+    risveglioThread(tipo, dir);
     pthread_mutex_unlock(&P.lock);
-    //pthread_mutex_unlock(&P.lock);
 
     //Permanenza
     sleep(2);
@@ -64,11 +60,8 @@ void* thread_work(void* t){
     P.inTransito[tipo][dir]--;
     printf("Thread %d - %s con direzione %s - Uscito dal ponte\n", tid, getUtente(tipo), getDirezione(dir));
 
-    pthread_cond_signal(&P.coda[tipo][dir]);
-    pthread_cond_signal(&P.coda[utenteOpposto(tipo)][dir]);
-    pthread_cond_signal(&P.coda[magri][dirOpposta(dir)]);
-    pthread_cond_signal(&P.coda[grassi][dirOpposta(dir)]);
-
+    //Risveglio thread
+    risveglioThread(tipo, dir);
     pthread_mutex_unlock(&P.lock);
 
     pthread_exit((void*)(intptr_t) tid);
