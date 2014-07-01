@@ -1,7 +1,8 @@
-*/.project
-*/.cproject
-*.exe
-*.out
 *.ali
+*.exe
 *.o
+*.out
+*/.cproject
+*/.project
 *~
+.DS_Store
