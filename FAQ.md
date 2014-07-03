@@ -2,6 +2,7 @@ FAQ
 ===
 
 D. Come distinguo un thread da un altro visto che hanno tutti lo stesso PID?
+
 R. E' necessario utilizzare la fuzione pthread_self() per ricevere il ThreadIdentifier (TID)
 
 D. [[Esercitazione2/Es1.c]] Perchè se inizializzo srand(time(NULL)) dentro il
