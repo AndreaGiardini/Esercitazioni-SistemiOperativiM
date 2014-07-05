@@ -5,4 +5,5 @@
 */.cproject
 */.project
 *~
+*.swp
 .DS_Store
