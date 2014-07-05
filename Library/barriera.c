@@ -1,5 +1,10 @@
 #include "barriera.h"
 
+/*
+ * Questa versione della barriera non utilizza variabili globali, ma tiene
+ * tutte le informazioni all'interno della struct, anche num_thread
+ * per una maggiore facilità di riutilizzo del codice
+ */
 void init_barriera(barriera *b, int num_thread)
 {
     sem_init(&b->mb, 0, 1);
