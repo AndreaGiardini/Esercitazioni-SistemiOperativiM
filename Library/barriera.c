@@ -14,7 +14,7 @@ void sync_barriera(barriera *b)
     sem_wait(&b->mb);
     b->arrivati++;
 
-    if (b->arrivati == b->num_thread){
+    if (b->arrivati == b->num_thread) {
         sem_post(&b->sb);
     }
 
