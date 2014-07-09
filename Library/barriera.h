@@ -4,8 +4,8 @@
 #include <semaphore.h>
 
 typedef struct {
-    sem_t mb;
-    sem_t sb;
+    sem_t sem_mutex;
+    sem_t sem_barriera;
     int arrivati;
     int num_thread;
 } barriera;
