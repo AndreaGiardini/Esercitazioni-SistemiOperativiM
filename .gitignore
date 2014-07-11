@@ -1,9 +1,11 @@
 *.ali
 *.exe
+*.iml
 *.o
 *.out
+*.swp
 */.cproject
 */.project
 *~
-*.swp
 .DS_Store
+.idea
