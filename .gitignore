@@ -1,7 +1,13 @@
-*/.project
-*/.cproject
-*.exe
-*.out
 *.ali
+*.class
+*.exe
+*.iml
 *.o
+*.out
+*.swp
+*/.cproject
+*/.project
 *~
+.DS_Store
+.idea
+b~*
