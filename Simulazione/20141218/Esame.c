@@ -32,36 +32,124 @@
 #include <semaphore.h>
 
 //macro
-#define N_DIPENDENTI 100 //numero dipendenti
-#define MAX_PIATTI 60 //piatti massimi che possono stare sul tavolo
-
-//tipi
-typedef struct
-{
-    pthread_mutex_t lock;
-    sem_t barrier;
-} Barriera;
+#define N_DIPENDENTI 10 //numero dipendenti
+#define MAX_PIATTI 6 //piatti massimi che possono stare sul tavolo
+#define MAX_TEMPO_PREPARAZIONE 2
+#define MAX_TEMPO_CONSUMAZIONE 3
 
 //definizioni
-Barriera barriera;
 pthread_t dipendenti[N_DIPENDENTI];
 pthread_t cuoco;
+
+typedef struct
+{
+    int primi_piatti_consumati;
+    sem_t primo_piatto, secondo_piatto, seconda_fase, posto_libero;
+    pthread_mutex_t lock;
+    
+} Mensa;
+
+Mensa mensa;
 
 //threads
 void * cuoco_thread(void * t)
 {
-    return NULL;
+    unsigned int tempo_di_preparazione;
+    /*
+     * [Comportamento del cuoco]
+     * 1) Mettere tutti i primi piatti sul tavolo senza avere PIATTI > MAX
+     * 2) Aspettare che tutti i dipendenti finiscano i primi piatti
+     * 3) Mettere tutti i secondi piatti sul tavolo senza avere PIATTI > MAX
+     * 4) Aspettare che tutti i dipendenti finiscano i secondi piatti
+     */
+    for(int i=0; i < N_DIPENDENTI; i++)
+    {
+        sem_wait(&mensa.posto_libero);
+    
+        tempo_di_preparazione = rand() % MAX_TEMPO_PREPARAZIONE;
+
+        printf("[Cuoco] Preparo un nuovo primo piatto\n");
+        sleep(tempo_di_preparazione);
+
+        sem_post(&mensa.primo_piatto);
+    }
+    
+    sem_wait(&mensa.seconda_fase);
+    
+    for(int i=0; i < N_DIPENDENTI; i++)
+    {
+        sem_wait(&mensa.posto_libero);
+        
+        tempo_di_preparazione = rand() % MAX_TEMPO_PREPARAZIONE;
+        
+        printf("[Cuoco] Preparo un nuovo secondo piatto\n");
+        sleep(tempo_di_preparazione);
+        
+        sem_post(&mensa.secondo_piatto);
+    }
+    
+    printf("[Cuoco] finito!\n");
+    
+    pthread_exit(NULL);
 }
 
 void * dipendente_thread(void * t)
 {
+    /*
+     * [Comportamento del dipendente]
+     * 1) Aspetto che sia presente un primo piatto sul bancone
+     * 2) Prelevo primo piatto dal bancone
+     * 3) Consumo primo piatto
+     * 4) Aspetto che sia presente un secondo piatto sul bancone
+     * 5) Consumo secondo piatto
+     */
+    
+    unsigned int tempo_di_consumazione;
+    int tid = (int)(intptr_t) t;
+    
+    sem_wait(&mensa.primo_piatto);
+    
+    tempo_di_consumazione = rand() % MAX_TEMPO_CONSUMAZIONE;
+    printf("[Dipendente %d] consumo primo piatto\n", tid);
+    sleep(tempo_di_consumazione);
+    
+    //CONSUMO PRIMO PIATTO
+    pthread_mutex_lock(&mensa.lock);
+    
+    mensa.primi_piatti_consumati++;
+    
+    printf("[Dipendente %d] finito primo piatto\n", tid);
+    
+    sem_post(&mensa.posto_libero);
+    
+    if(mensa.primi_piatti_consumati == N_DIPENDENTI)
+    {
+        printf("[Dipendente %d] sono l'ultimo a finire il primo piatto! Si dia il via ai secondi piatti!\n", tid);
+        sem_post(&mensa.seconda_fase);
+    }
+    pthread_mutex_unlock(&mensa.lock);
+
+    sem_wait(&mensa.secondo_piatto);
+    
+    printf("[Dipendente %d] consumo secondo piatto\n", tid);
+    sleep(tempo_di_consumazione);
+    
+    //CONSUMO SECONDO PIATTO
+    sem_post(&mensa.posto_libero);
+    
+    printf("[Dipendente %d] grazie del pranzo\n", tid);
+    
     return NULL;
 }
 
 //utils
-void init()
+void init(Mensa *m)
 {
-
+    sem_init(&m->posto_libero, 0, MAX_PIATTI);
+    sem_init(&m->primo_piatto, 0, 0);
+    sem_init(&m->seconda_fase, 0, 0);
+    sem_init(&m->secondo_piatto, 0, 0);
+    pthread_mutex_init(&m->lock, NULL);
 }
 
 int main(int argc, char * argv[])
@@ -70,8 +158,7 @@ int main(int argc, char * argv[])
     int result;
     void * status;
     
-    init();
-    
+    init(&mensa);
     
     for(int i=0; i < N_DIPENDENTI; i++)
     {
