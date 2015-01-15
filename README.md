@@ -12,3 +12,7 @@ gcc -Wall -D_REENTRANT *.c -lpthread && ./a.out
 Per compilare i programmi Ada:
 
 gnat make *.adb
+
+Per compilare i programmi Go:
+
+go run *.go
