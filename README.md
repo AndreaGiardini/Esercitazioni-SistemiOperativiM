@@ -6,13 +6,16 @@ Operativi M (http://lia.deis.unibo.it/Courses/som1314/) dell'Università di
 Bologna.
 
 Per compilare i programmi C è necessario utilizzare la stringa:
-
+```
 gcc -Wall -D_REENTRANT *.c -lpthread && ./a.out
+```
 
 Per compilare i programmi Ada:
-
+```
 gnat make *.adb
+```
 
 Per compilare i programmi Go:
-
+```
 go run *.go
+```
